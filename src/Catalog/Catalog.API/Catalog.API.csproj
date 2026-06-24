@@ -1,17 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <DockerComposeProjectPath>..\..\..\docker-compose.dcproj</DockerComposeProjectPath>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>..\..\..</DockerfileContext>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
-    <PackageReference Include="MongoDB.Driver" Version="2.10.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.3.1" />
-  </ItemGroup>
+    <!-- Este paquete ya no es necesario en .NET 8 -->
+    <!-- <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" /> -->
 
+    <!-- MongoDB.Driver actualizado -->
+    <PackageReference Include="MongoDB.Driver" Version="2.25.0" />
+
+    <!-- Swashbuckle actualizado -->
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+  </ItemGroup>
 
 </Project>
