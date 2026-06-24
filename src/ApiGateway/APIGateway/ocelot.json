@@ -1,6 +1,6 @@
 {
   "ReRoutes": [
-    //Catalog API
+    
     {
       "DownstreamPathTemplate": "/api/v1/Catalog",
       "DownstreamScheme": "http",
@@ -37,7 +37,7 @@
       "UpstreamPathTemplate": "/Catalog/GetProductByCategory/{category}",
       "UpstreamHttpMethod": [ "GET" ]
     },
-    //Basket API
+    
     {
       "DownstreamPathTemplate": "/api/v1/Basket",
       "DownstreamScheme": "http",
@@ -74,7 +74,7 @@
       "UpstreamPathTemplate": "/Basket/Checkout",
       "UpstreamHttpMethod": [ "POST" ]
     },
-    //Order API
+    
     {
       "DownstreamPathTemplate": "/api/v1/Order",
       "DownstreamScheme": "http",
