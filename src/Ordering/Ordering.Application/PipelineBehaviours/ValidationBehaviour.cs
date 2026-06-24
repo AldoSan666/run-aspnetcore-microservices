@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Ordering.Application.PipelineBehaviours
 {
     public class ValidationBehaviour<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
-    where TRequest : IRequest<TResponse>
+        where TRequest : IRequest<TResponse>
     {
         private readonly IEnumerable<IValidator<TRequest>> _validators;
 
@@ -17,23 +17,31 @@ namespace Ordering.Application.PipelineBehaviours
             _validators = validators;
         }
 
-        public Task<TResponse> Handle(TRequest request, CancellationToken cancellationToken, RequestHandlerDelegate<TResponse> next)
+        public async Task<TResponse> Handle(
+            TRequest request,
+            RequestHandlerDelegate<TResponse> next,
+            CancellationToken cancellationToken)
         {
-            var context = new ValidationContext(request);
-            var failures = _validators
-                .Select(x => x.Validate(context))
-                .SelectMany(x => x.Errors)
-                .Where(x => x != null)
-                .ToList();
-
-            // TODO: add context to which command/query is throwing the exception and its origination
-
-            if (failures.Any())
+            if (_validators.Any())
             {
-                throw new ValidationException(failures);
+                var context = new ValidationContext<TRequest>(request);
+
+                var validationResults = await Task.WhenAll(
+                    _validators.Select(v => v.ValidateAsync(context, cancellationToken))
+                );
+
+                var failures = validationResults
+                    .SelectMany(r => r.Errors)
+                    .Where(f => f != null)
+                    .ToList();
+
+                if (failures.Any())
+                {
+                    throw new ValidationException(failures);
+                }
             }
 
-            return next();
+            return await next();
         }
     }
 }

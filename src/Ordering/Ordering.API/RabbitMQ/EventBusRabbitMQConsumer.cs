@@ -45,14 +45,14 @@ namespace Ordering.API.RabbitMQ
         {
             if (e.RoutingKey == EventBusConstants.BasketCheckoutQueue)
             {
-                var message = Encoding.UTF8.GetString(e.Body);
+                var message = Encoding.UTF8.GetString(e.Body.ToArray());
                 var basketCheckoutEvent = JsonConvert.DeserializeObject<BasketCheckoutEvent>(message);
 
-                // NOTE : This is Internal Checkout Operation Call
                 var command = _mapper.Map<CheckoutOrderCommand>(basketCheckoutEvent);
                 var result = await _mediator.Send(command);
             }
         }
+
 
         public void Disconnect()
         {

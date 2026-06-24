@@ -31,37 +31,31 @@ namespace Ordering.API
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
 
             #region SqlServer Dependencies
 
-            //// use in-memory database
-            //services.AddDbContext<OrderContext>(c =>
-            //    c.UseInMemoryDatabase("OrderConnection"));
-
-            // use real database
             services.AddDbContext<OrderContext>(c =>
-                c.UseSqlServer(Configuration.GetConnectionString("OrderConnection")), ServiceLifetime.Singleton); // we made singleton this in order to resolve in mediatR when consuming Rabbit
+                c.UseSqlServer(Configuration.GetConnectionString("OrderConnection")),
+                ServiceLifetime.Singleton);
 
             #endregion
 
             #region Project Dependencies
 
-            // Add Infrastructure Layer
             services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
             services.AddScoped(typeof(IOrderRepository), typeof(OrderRepository));
-            services.AddTransient<IOrderRepository, OrderRepository>(); // we made transient this in order to resolve in mediatR when consuming Rabbit
+            services.AddTransient<IOrderRepository, OrderRepository>();
 
-            // Add AutoMapper
+            // AutoMapper
             services.AddAutoMapper(typeof(Startup));
 
-            // Add MediatR
-            services.AddMediatR(typeof(CheckoutOrderHandler).GetTypeInfo().Assembly);
+            // MediatR (versión 11.x)
+            services.AddMediatR(typeof(CheckoutOrderHandler).Assembly);
 
-            //Domain Level Validation
+            // Pipeline Behaviours
             services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehaviour<,>));
 
             #endregion
@@ -76,14 +70,10 @@ namespace Ordering.API
                 };
 
                 if (!string.IsNullOrEmpty(Configuration["EventBus:UserName"]))
-                {
                     factory.UserName = Configuration["EventBus:UserName"];
-                }
 
                 if (!string.IsNullOrEmpty(Configuration["EventBus:Password"]))
-                {
                     factory.Password = Configuration["EventBus:Password"];
-                }
 
                 return new RabbitMQConnection(factory);
             });
@@ -92,7 +82,7 @@ namespace Ordering.API
 
             #endregion
 
-            #region Swagger Dependencies
+            #region Swagger
 
             services.AddSwaggerGen(c =>
             {
@@ -102,13 +92,10 @@ namespace Ordering.API
             #endregion
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseRouting();
 
@@ -119,7 +106,6 @@ namespace Ordering.API
                 endpoints.MapControllers();
             });
 
-            //Initilize Rabbit Listener in ApplicationBuilderExtentions
             app.UseRabbitListener();
 
             app.UseSwagger();
